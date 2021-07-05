@@ -1,1 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mx_promotions_sale_line_line,sale.order.line.reference,model_sale_order_line_reference,,1,1,1,1
