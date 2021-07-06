@@ -227,7 +227,7 @@ class MxPromotionssale(models.Model):
                 real_amount = real_amount +  res_amount
                
                 changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':  (real_amount/real_line.quantity)  } ) )    
-            return changes_line
+        return changes_line
     def _create_invoices(self, grouped=False, final=False):
         res = super(MxPromotionssale, self)._create_invoices(grouped,final)
         for order in self:
