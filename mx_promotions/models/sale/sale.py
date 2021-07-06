@@ -208,6 +208,26 @@ class MxPromotionssale(models.Model):
         }
    
     #Reward MEX
+    def _adjust_reward_invoice(self,inv,cup,changes_line):
+        changes_line = changes_line
+        for lines_to_apply in cup.promotions_applied_mx:
+            ref_id = lines_to_apply.ref_sol
+            #Find sale line with related lines cupon
+            real_line = inv.invoice_line_ids.filtered(lambda il: ref_id.id in  [ sl.id for sl in   il.sale_line_ids ] )
+            remove_line_reward = inv.invoice_line_ids.filtered(lambda il: cup.id in  [ sl.id for sl in   il.sale_line_ids ] )
+            changes_line['invoice_line_ids'].append( (2, remove_line_reward.id)   )
+            if  cup.cupon_id.reward_product_quantity == real_line.quantity :
+                changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':0.1 } ) )
+            else:
+                #Dist all discount to specific line , being 2 x 1 , 3 x 1 , 2x3 ... 
+                real_amount = real_line.quantity * real_line.price_unit
+                
+                res_amount =  remove_line_reward.quantity * remove_line_reward.price_unit
+                
+                real_amount = real_amount +  res_amount
+               
+                changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':  (real_amount/real_line.quantity)  } ) )    
+            return changes_line
     def _create_invoices(self, grouped=False, final=False):
         res = super(MxPromotionssale, self)._create_invoices(grouped,final)
         for order in self:
@@ -220,44 +240,13 @@ class MxPromotionssale(models.Model):
                 #"Free product"
                 for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'product'):   
                     #Get related lines to cupon
-                    for lines_to_apply in cup.promotions_applied_mx:
-                        ref_id = lines_to_apply.ref_sol
-                        #Find sale line with related lines cupon
-                        real_line = inv.invoice_line_ids.filtered(lambda il: ref_id.id in  [ sl.id for sl in   il.sale_line_ids ] )
-                        remove_line_reward = inv.invoice_line_ids.filtered(lambda il: cup.id in  [ sl.id for sl in   il.sale_line_ids ] )
-                        changes_line['invoice_line_ids'].append( (2, remove_line_reward.id)   )
-                        if  cup.cupon_id.reward_product_quantity == real_line.quantity :
-                            changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':0.1 } ) )
-                        else:
-                            #Dist all discount to specific line , being 2 x 1 , 3 x 1 , 2x3 ... 
-                            real_amount = real_line.quantity * real_line.price_unit
-                            
-                            res_amount =  remove_line_reward.quantity * remove_line_reward.price_unit
-                            
-                            real_amount = real_amount +  res_amount
-                           
-                            changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':  (real_amount/real_line.quantity)  } ) )
+                    changes_line = self._adjust_reward_invoice(inv,cup,changes_line)
                 #Free shipping
                 for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'free_shipping'):
-                    for lines_to_apply in cup.promotions_applied_mx:
-                        ref_id = lines_to_apply.ref_sol
-                        #Find sale line with related lines cupon
-                        real_line = inv.invoice_line_ids.filtered(lambda il: ref_id.id in  [ sl.id for sl in   il.sale_line_ids ] )
-                        remove_line_reward = inv.invoice_line_ids.filtered(lambda il: cup.id in  [ sl.id for sl in   il.sale_line_ids ] )
-                        changes_line['invoice_line_ids'].append( (2, remove_line_reward.id)   )
-                        if  cup.cupon_id.reward_product_quantity == real_line.quantity :
-                            changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':0.1 } ) )
-                        else:
-                            #Dist all discount to specific line , being 2 x 1 , 3 x 1 , 2x3 ... 
-                            real_amount = real_line.quantity * real_line.price_unit
-                            
-                            res_amount =  remove_line_reward.quantity * remove_line_reward.price_unit
-                            
-                            real_amount = real_amount +  res_amount
-                           
-                            changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':  (real_amount/real_line.quantity)  } ) )
+                    changes_line = self._adjust_reward_invoice(inv,cup,changes_line)
                 #Reward disc % and fix amount products
-                for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'free_shipping'):
+                #or cup in have_coupouns.filtered(lambda ol: ol.cupon_id.discount_type == 'percentaje' and ol.cupon_id.discount_type == 'cheapest_product' ):
+
                     pass    
 
 
