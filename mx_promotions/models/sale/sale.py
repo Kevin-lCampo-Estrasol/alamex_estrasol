@@ -251,7 +251,7 @@ class MxPromotionssale(models.Model):
                     type_reward ="free_reward"
                     changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
                 #Reward disc % and fix amount products
-                for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'discount' and  ol.cupon_id.discount_type == 'percentaje' and ol.cupon_id.discount_type == 'cheapest_product' ):
+                for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'discount' and  ol.cupon_id.discount_type == 'percentage' and ol.cupon_id.discount_apply_on == 'cheapest_product' ):
                     type_reward ="discount_porcent"
                     changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
                     
