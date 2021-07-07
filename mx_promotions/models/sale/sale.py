@@ -227,9 +227,10 @@ class MxPromotionssale(models.Model):
                 if type_reward == 'free_reward':
                     #Dist all discount to specific line , being 2 x 1 , 3 x 1 , 2x3 ... 
                     real_amount = real_line.quantity * real_line.price_unit
-                    
+                                  
+
                     res_amount =  remove_line_reward.quantity * remove_line_reward.price_unit
-                    
+                                                                    
                     real_amount = real_amount +  res_amount
                 
                     changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':  (real_amount/real_line.quantity)  } ) )    
@@ -264,8 +265,8 @@ class MxPromotionssale(models.Model):
                 for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'discount' and  ol.cupon_id.discount_type == 'percentage' and ol.cupon_id.discount_apply_on == 'cheapest_product' ):
                     type_reward ="discount_porcent"
                     changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
-                inv.update( changes_line ) 
-                inv._onchange_invoice_line_ids()    
+                #inv.update( changes_line ) 
+                #inv._onchange_invoice_line_ids()    
 
 
                                 
