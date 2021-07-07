@@ -208,8 +208,9 @@ class MxPromotionssale(models.Model):
         }
    
     #Reward MEX
-    def _adjust_reward_invoice(self,inv,cup,changes_line):
+    def _adjust_reward_invoice(self,inv,cup,changes_line,type_reward):
         changes_line = changes_line
+        #Check applied prootions
         for lines_to_apply in cup.promotions_applied_mx:
             ref_id = lines_to_apply.ref_sol
             #Find sale line with related lines cupon
@@ -217,7 +218,10 @@ class MxPromotionssale(models.Model):
             remove_line_reward = inv.invoice_line_ids.filtered(lambda il: cup.id in  [ sl.id for sl in   il.sale_line_ids ] )
             changes_line['invoice_line_ids'].append( (2, remove_line_reward.id)   )
             if  cup.cupon_id.reward_product_quantity == real_line.quantity :
-                changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':0.1 } ) )
+                if type_reward == 'free_reward':
+                   changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':0.1 } ) )
+                else:
+                   changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit': ref_id.pirce_unit - lines_to_apply.price_unit } ) )
             else:
                 #Dist all discount to specific line , being 2 x 1 , 3 x 1 , 2x3 ... 
                 real_amount = real_line.quantity * real_line.price_unit
@@ -240,14 +244,17 @@ class MxPromotionssale(models.Model):
                 #"Free product"
                 for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'product'):   
                     #Get related lines to cupon
-                    changes_line = self._adjust_reward_invoice(inv,cup,changes_line)
+                    type_reward ="free_reward"
+                    changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
                 #Free shipping
                 for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'free_shipping'):
-                    changes_line = self._adjust_reward_invoice(inv,cup,changes_line)
+                    type_reward ="free_reward"
+                    changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
                 #Reward disc % and fix amount products
-                #or cup in have_coupouns.filtered(lambda ol: ol.cupon_id.discount_type == 'percentaje' and ol.cupon_id.discount_type == 'cheapest_product' ):
-
-                    pass    
+                for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'discount' and  ol.cupon_id.discount_type == 'percentaje' and ol.cupon_id.discount_type == 'cheapest_product' ):
+                    type_reward ="discount_porcent"
+                    changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
+                    
 
 
                                 
