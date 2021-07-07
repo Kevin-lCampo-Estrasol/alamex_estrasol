@@ -268,9 +268,7 @@ class MxPromotionssale(models.Model):
 
 
                                 
-                inv.update( changes_line ) 
-                inv._onchange_invoice_line_ids()         
-
+                
 
 
  
