@@ -221,7 +221,7 @@ class MxPromotionssale(models.Model):
                 if type_reward == 'free_reward':
                    changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':0.1 } ) )
                 else:
-                   changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit': ref_id.pirce_unit - lines_to_apply.price_unit } ) )
+                   changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit': ref_id.price_unit - lines_to_apply.price_unit } ) )
             else:
                 #Dist all discount to specific line , being 2 x 1 , 3 x 1 , 2x3 ... 
                 real_amount = real_line.quantity * real_line.price_unit
