@@ -209,7 +209,8 @@ class MxPromotionssale(models.Model):
    
     #Reward MEX
     def _adjust_reward_invoice(self,inv,cup,changes_line,type_reward):
-        changes_line = changes_line
+        changes_line={}
+        changes_line['invoice_line_ids'] = []
         #Check applied prootions
         for lines_to_apply in cup.promotions_applied_mx:
             ref_id = lines_to_apply.ref_sol
