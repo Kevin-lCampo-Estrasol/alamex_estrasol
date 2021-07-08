@@ -132,13 +132,13 @@ class MxPromotionssale(models.Model):
                
             for line in lines:
                 discount_line_amount = self._get_reward_values_discount_percentage_per_line(program, line)
-                _logger.info("XXXXXXXXX")
-                _logger.info(discount_line_amount)
+                
                 if discount_line_amount:
 
                     if line.tax_id in reward_dict:
                         reward_dict[line.tax_id]['price_unit'] -= discount_line_amount
-                        reward_dict[line.tax_id]['promotions_applied_mx'].append( (0, 0,  { 'name':str(line.id) ,'line_id':line.id } ) )
+                        if not  line.is_reward_line:
+                            reward_dict[line.tax_id]['promotions_applied_mx'].append( (0, 0,  { 'name':str(line.id) ,'line_id':line.id } ) )
                     else:
                         taxes = line.tax_id
                         if self.fiscal_position_id:
@@ -159,7 +159,7 @@ class MxPromotionssale(models.Model):
                             'is_reward_line': True,
                             'tax_id': [(4, tax.id, False) for tax in taxes],
                             'cupon_id':program.id,
-                            'promotions_applied_mx':[(0, 0,  { 'name':str(line.id) ,'ref_sol':line.id } ) ] 
+                            'promotions_applied_mx':[(0, 0,  { 'name':str(line.id) ,'ref_sol':line.id } )  ] if not  line.is_reward_line else []  
                         }
 
         # If there is a max amount for discount, we might have to limit some discount lines or completely remove some lines
