@@ -129,10 +129,11 @@ class MxPromotionssale(models.Model):
                 # We should not exclude reward line that offer this product since we need to offer only the discount on the real paid product (regular product - free product)
                 free_product_lines = self.env['sale.coupon.program'].search([('reward_type', '=', 'product'), ('reward_product_id', 'in', program.discount_specific_product_ids.ids)]).mapped('discount_line_product_id')
                 lines = lines.filtered(lambda x: x.product_id in (program.discount_specific_product_ids | free_product_lines))
-
+                _logger.info("XXXXXXXXX")
+                _logger.info(lines)
             for line in lines:
                 discount_line_amount = self._get_reward_values_discount_percentage_per_line(program, line)
-
+               
                 if discount_line_amount:
 
                     if line.tax_id in reward_dict:
@@ -206,7 +207,10 @@ class MxPromotionssale(models.Model):
             'tax_id': [(4, tax.id, False) for tax in taxes],
             'promotions_applied_mx':[(0, 0,  { 'name':str(line.id) ,'ref_sol':line.id } ) for line in order_lines if line.product_id == program.reward_product_id  ] 
         }
-   
+    def _check_updatable_reward(self,inv,changes_line):
+         if not changes_line:   
+            inv.update( changes_line ) 
+            inv._onchange_invoice_line_ids()
     #Reward MEX
     def _adjust_reward_invoice(self,inv,cup,changes_line,type_reward):
         changes_line={}
@@ -222,9 +226,9 @@ class MxPromotionssale(models.Model):
                 if type_reward == 'free_reward':
                    changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':0.1 } ) )
                 else:
+                    
                    changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit': ref_id.price_unit + cup.price_unit } ) )
             else:
-                
                     #Dist all discount to specific line , being 2 x 1 , 3 x 1 , 2x3 ... 
                     real_amount = real_line.quantity * real_line.price_unit                  
 
@@ -241,32 +245,30 @@ class MxPromotionssale(models.Model):
             inv = res.filtered(lambda t: t.invoice_origin == order.name)
             if inv:
                 #Coupon avaible
-                changes_line={}
-                changes_line['invoice_line_ids'] = []
                 have_coupouns = order.order_line.filtered(lambda ol: ol.is_reward_line and  ol.cupon_id)
-                #"Free product"
                 
+                #CASE FREE PRODUCTS
+                changes_line=False               
                 for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'product'):   
                     #Get related lines to cupon
                     type_reward ="free_reward"
                     changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
+                self._check_updatable_reward(inv,changes_line)
                 #Free shipping
-                inv.update( changes_line ) 
-                inv._onchange_invoice_line_ids()
-                """ 
+               
+                #CASE FREE PRODUCTS SHIPPING
+                changes_line=False 
                 for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'free_shipping'):
                     type_reward ="free_reward"
                     changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
-                #Reward disc % and fix amount products
-                inv.update( changes_line ) 
-                inv._onchange_invoice_line_ids()
-                """
+                self._check_updatable_reward(inv,changes_line)
+                
+                #CASE CHEPEASTE PRODUCT
+                changes_line=False
                 for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'discount' and  ol.cupon_id.discount_type == 'percentage' and ol.cupon_id.discount_apply_on == 'cheapest_product' ):
                     type_reward ="discount_porcent"
                     changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
-                inv.update( changes_line ) 
-                inv._onchange_invoice_line_ids()    
-
+                self._check_updatable_reward(inv,changes_line)
 
                                 
                 
