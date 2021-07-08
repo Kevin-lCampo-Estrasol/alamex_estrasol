@@ -208,7 +208,7 @@ class MxPromotionssale(models.Model):
             'promotions_applied_mx':[(0, 0,  { 'name':str(line.id) ,'ref_sol':line.id } ) for line in order_lines if line.product_id == program.reward_product_id  ] 
         }
     def _check_updatable_reward(self,inv,changes_line):
-         if not changes_line:   
+         if changes_line:   
             inv.update( changes_line ) 
             inv._onchange_invoice_line_ids()
     #Reward MEX
@@ -266,6 +266,7 @@ class MxPromotionssale(models.Model):
                 #CASE CHEPEASTE PRODUCT
                 changes_line=False
                 for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'discount' and  ol.cupon_id.discount_type == 'percentage' and ol.cupon_id.discount_apply_on == 'cheapest_product' ):
+  
                     type_reward ="discount_porcent"
                     changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
                 self._check_updatable_reward(inv,changes_line)
