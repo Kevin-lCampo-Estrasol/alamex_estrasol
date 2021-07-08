@@ -129,11 +129,11 @@ class MxPromotionssale(models.Model):
                 # We should not exclude reward line that offer this product since we need to offer only the discount on the real paid product (regular product - free product)
                 free_product_lines = self.env['sale.coupon.program'].search([('reward_type', '=', 'product'), ('reward_product_id', 'in', program.discount_specific_product_ids.ids)]).mapped('discount_line_product_id')
                 lines = lines.filtered(lambda x: x.product_id in (program.discount_specific_product_ids | free_product_lines))
-                _logger.info("XXXXXXXXX")
-                _logger.info(lines)
+               
             for line in lines:
                 discount_line_amount = self._get_reward_values_discount_percentage_per_line(program, line)
-               
+                _logger.info("XXXXXXXXX")
+                _logger.info(discount_line_amount)
                 if discount_line_amount:
 
                     if line.tax_id in reward_dict:
