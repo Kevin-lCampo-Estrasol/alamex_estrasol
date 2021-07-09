@@ -269,8 +269,14 @@ class MxPromotionssale(models.Model):
   
                     type_reward ="discount_porcent"
                     changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
-                self._check_updatable_reward(inv,changes_line)
-
+                    self._check_updatable_reward(inv,changes_line)
+                
+                #CASE SPECIFIC PRODUCTS
+                changes_line=False
+                for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'discount' and  ol.cupon_id.discount_type == 'percentage' and ol.cupon_id.discount_apply_on == 'specific_products' ): 
+                    type_reward ="discount_porcent"
+                    changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
+                    self._check_updatable_reward(inv,changes_line)
                                 
                 
 
