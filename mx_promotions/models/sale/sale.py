@@ -227,17 +227,17 @@ class MxPromotionssale(models.Model):
                 changes_line['invoice_line_ids'].append( (2, remove_line_reward.id)   )
                 if  cup.cupon_id.reward_product_quantity == real_line.quantity :
                     if type_reward == 'free_reward':
-                        changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':0.1 } ) )
+                        changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':0.01 } ) )
                     else: 
                         changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit': ref_id.price_unit + cup.price_unit } ) )
                 else:
                         #Dist all discount to specific line , being 2 x 1 , 3 x 1 , 2x3 ... 
                         real_amount = real_line.quantity * real_line.price_unit                  
-
+                        
                         res_amount =  remove_line_reward.quantity * remove_line_reward.price_unit
                                                                         
                         real_amount = real_amount +  res_amount
-                    
+                        
                         changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':  (real_amount/real_line.quantity)  } ) )    
                         
         return changes_line
