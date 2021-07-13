@@ -219,6 +219,7 @@ class MxPromotionssale(models.Model):
         if type_reward == 'specific_products':
             remove_line_reward = inv.invoice_line_ids.filtered(lambda il: cup.id in  [ sl.id for sl in   il.sale_line_ids ] )
             actual_amount =  -(remove_line_reward.quantity * remove_line_reward.price_unit)
+            _logger.info(cup.promotions_applied_mx)  
             for lines_to_apply in cup.promotions_applied_mx:
                 ref_id = lines_to_apply.ref_sol
                 real_line = inv.invoice_line_ids.filtered(lambda il: ref_id.id in  [ sl.id for sl in   il.sale_line_ids ] )
@@ -238,10 +239,11 @@ class MxPromotionssale(models.Model):
                         
                         changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':  real_line.price_unit - temp_discount   } ) )
                         actual_amount -= (temp_discount * real_line.quantity)
-                _logger.info(actual_amount)        
+                      
             return changes_line
 
         else: 
+
             for lines_to_apply in cup.promotions_applied_mx:
                 ref_id = lines_to_apply.ref_sol
                 #Find sale line with related lines cupon
