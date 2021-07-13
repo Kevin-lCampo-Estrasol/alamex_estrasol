@@ -217,7 +217,27 @@ class MxPromotionssale(models.Model):
         changes_line['invoice_line_ids'] = []
         #Check applied prootions
         if type_reward == 'specific_products':
-            lines_to_apply = []
+            real_lines = inv.invoice_line_ids.filtered(lambda il: ref_id.id in  [ sl.id for sl in   il.sale_line_ids ] )
+            real_lines =  real_lines.sorted('price_unit')
+            remove_line_reward = inv.invoice_line_ids.filtered(lambda il: cup.id in  [ sl.id for sl in   il.sale_line_ids ] )
+            actual_amount =  -(remove_line_reward.quantity * remove_line_reward.price_unit)
+            changes_line['invoice_line_ids'].append( (2, remove_line_reward.id)   )
+            for line in real_lines:
+                real_price = (line.price_unit * line.quantity)
+                if real_price > actual_amount and line.price_unit != 0.01 :
+                   
+                    changes_line['invoice_line_ids'].append( ( 1, line.id, { 'price_unit':  line.price_unit - (actual_amount/line.quantity)   } ) )    
+                    return changes_line
+                else:
+                   if line.price_unit == 0.01 :
+                       pass
+                   else: 
+                       temp_discount = line.price_unit - 0.01
+                       
+                       changes_line['invoice_line_ids'].append( ( 1, line.id, { 'price_unit':  line.price_unit - temp_discount   } ) )
+                       actual_amount -= temp_discount * line.quantity
+            return changes_line
+
         else: 
             for lines_to_apply in cup.promotions_applied_mx:
                 ref_id = lines_to_apply.ref_sol
@@ -274,13 +294,11 @@ class MxPromotionssale(models.Model):
                     self._check_updatable_reward(inv,changes_line)
                 
                 #CASE SPECIFIC PRODUCTS
-                #changes_line=False
-                #for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'discount' and  ol.cupon_id.discount_type == 'percentage' and ol.cupon_id.discount_apply_on == 'specific_products' ): 
-                #    type_reward ="specific_products"
-                #    changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)
-                #    
-                    
-                #    self._check_updatable_reward(inv,changes_line)
+                changes_line=False
+                for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'discount' and  ol.cupon_id.discount_type == 'percentage' and ol.cupon_id.discount_apply_on == 'specific_products' ): 
+                    type_reward ="specific_products"
+                    changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)    
+                    self._check_updatable_reward(inv,changes_line)
                                 
                 
 
