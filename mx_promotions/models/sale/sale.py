@@ -219,7 +219,7 @@ class MxPromotionssale(models.Model):
         if type_reward == 'specific_products':
             remove_line_reward = inv.invoice_line_ids.filtered(lambda il: cup.id in  [ sl.id for sl in   il.sale_line_ids ] )
             actual_amount =  -(remove_line_reward.quantity * remove_line_reward.price_unit)
-            for lines_to_apply in cup.promotions_applied_mx.sorted('price_unit'):
+            for lines_to_apply in cup.promotions_applied_mx:
                 ref_id = lines_to_apply.ref_sol
                 real_line = inv.invoice_line_ids.filtered(lambda il: ref_id.id in  [ sl.id for sl in   il.sale_line_ids ] )
                 changes_line['invoice_line_ids'].append( (2, remove_line_reward.id)   )
