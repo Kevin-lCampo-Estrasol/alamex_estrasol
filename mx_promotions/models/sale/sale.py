@@ -224,6 +224,9 @@ class MxPromotionssale(models.Model):
                 real_line = inv.invoice_line_ids.filtered(lambda il: ref_id.id in  [ sl.id for sl in   il.sale_line_ids ] )
                 changes_line['invoice_line_ids'].append( (2, remove_line_reward.id)   )
                 real_price = (real_line.price_unit * real_line.quantity)
+                _logger.info(ref_id)  
+                _logger.info(real_price)  
+                _logger.info(actual_amount)  
                 if real_price > actual_amount and real_line.price_unit != 0.01 :
                     changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':  real_line.price_unit - (actual_amount/real_line.quantity)   } ) )    
                     return changes_line
