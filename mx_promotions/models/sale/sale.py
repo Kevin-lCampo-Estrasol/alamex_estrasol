@@ -222,6 +222,7 @@ class MxPromotionssale(models.Model):
             _logger.info(cup.promotions_applied_mx)  
             for lines_to_apply in cup.promotions_applied_mx:
                 ref_id = lines_to_apply.ref_sol
+                _logger.info(lines_to_apply)  
                 real_line = inv.invoice_line_ids.filtered(lambda il: ref_id.id in  [ sl.id for sl in   il.sale_line_ids ] )
                 changes_line['invoice_line_ids'].append( (2, remove_line_reward.id)   )
                 real_price = (real_line.price_unit * real_line.quantity)
