@@ -235,6 +235,7 @@ class MxPromotionssale(models.Model):
                         
                         changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':  real_line.price_unit - temp_discount   } ) )
                         actual_amount -= (temp_discount * real_line.quantity)
+                _logger.info(actual_amount)        
             return changes_line
 
         else: 
