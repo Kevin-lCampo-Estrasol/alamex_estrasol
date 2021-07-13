@@ -138,7 +138,7 @@ class MxPromotionssale(models.Model):
                     if line.tax_id in reward_dict:
                         reward_dict[line.tax_id]['price_unit'] -= discount_line_amount
                         if not  line.is_reward_line:
-                            reward_dict[line.tax_id]['promotions_applied_mx'].append( (0, 0,  { 'name':str(line.id) ,'line_id':line.id } ) )
+                            reward_dict[line.tax_id]['promotions_applied_mx'].append( (0, 0,  { 'name':str(line.id) ,'ref_sol':line.id } ) )
                     else:
                         taxes = line.tax_id
                         if self.fiscal_position_id:
