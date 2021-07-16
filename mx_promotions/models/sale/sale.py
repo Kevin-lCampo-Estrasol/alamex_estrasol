@@ -305,6 +305,7 @@ class MxPromotionssale(models.Model):
                                 
                 #CASE DISCOUNTS FINAL
                 changes_line=False
+                """
                 for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'discount' and   ( ol.cupon_id.discount_type == 'fixed_amount' or ol.cupon_id.discount_apply_on == 'on_order') ): 
                     remove_line_reward = inv.invoice_line_ids.filtered(lambda il: cup.id in  [ sl.id for sl in   il.sale_line_ids ] )
                     
@@ -327,7 +328,7 @@ class MxPromotionssale(models.Model):
                             
                     
                     self._check_updatable_reward(inv,changes_line)
-
+                """
 
  
     
