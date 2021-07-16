@@ -308,7 +308,7 @@ class MxPromotionssale(models.Model):
                 
                 for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'discount' and   ( ol.cupon_id.discount_type == 'fixed_amount' or ol.cupon_id.discount_apply_on == 'on_order') ): 
                     remove_line_reward = inv.invoice_line_ids.filtered(lambda il: cup.id in  [ sl.id for sl in   il.sale_line_ids ] )
-                    _logger.info("TORERO")
+                    _logger.info("TOSSRESSSRSO")
                     _logger.info(remove_line_reward)
                     inv_lines = inv.invoice_line_ids.filtered(lambda il: remove_line_reward.id != il.id )
                     actual_amount = -(remove_line_reward.quantity * remove_line_reward.price_unit)
@@ -329,7 +329,7 @@ class MxPromotionssale(models.Model):
                             
                     
                     self._check_updatable_reward(inv,changes_line)
-                """
+               
 
  
     
