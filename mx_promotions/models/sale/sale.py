@@ -219,16 +219,13 @@ class MxPromotionssale(models.Model):
         if type_reward == 'specific_products':
             remove_line_reward = inv.invoice_line_ids.filtered(lambda il: cup.id in  [ sl.id for sl in   il.sale_line_ids ] )
             actual_amount =  -(remove_line_reward.quantity * remove_line_reward.price_unit)
-            _logger.info(cup.promotions_applied_mx)  
+           
             for lines_to_apply in cup.promotions_applied_mx:
-                ref_id = lines_to_apply.ref_sol
-                _logger.info(lines_to_apply)  
+                ref_id = lines_to_apply.ref_sol  
                 real_line = inv.invoice_line_ids.filtered(lambda il: ref_id.id in  [ sl.id for sl in   il.sale_line_ids ] )
                 changes_line['invoice_line_ids'].append( (2, remove_line_reward.id)   )
                 real_price = (real_line.price_unit * real_line.quantity)
-                _logger.info(ref_id)  
-                _logger.info(real_price)  
-                _logger.info(actual_amount)  
+               
                 if real_price > actual_amount and real_line.price_unit != 0.01 :
                     changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':  real_line.price_unit - (actual_amount/real_line.quantity)   } ) )    
                     return changes_line
@@ -306,7 +303,30 @@ class MxPromotionssale(models.Model):
                     changes_line = self._adjust_reward_invoice(inv,cup,changes_line,type_reward)    
                     self._check_updatable_reward(inv,changes_line)
                                 
-                
+                #CASE DISCOUNTS FINAL
+                changes_line=False
+                for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'discount' and   ( ol.cupon_id.discount_type == 'fixed_amount' or ol.cupon_id.discount_apply_on == 'on_order') ): 
+                    remove_line_reward = inv.invoice_line_ids.filtered(lambda il: cup.id in  [ sl.id for sl in   il.sale_line_ids ] )
+                    
+                    inv_lines = inv.invoice_line_ids.filtered(lambda il: remove_line_reward.id != il.id )
+                    actual_amount = -(remove_line_reward.quantity * remove_line_reward.price_unit)
+                    changes_line['invoice_line_ids'].append( (2, remove_line_reward.id)   )
+                    for real_line in  inv_lines:
+                        real_price = (real_line.price_unit * real_line.quantity)
+                        if real_price > actual_amount and real_line.price_unit != 0.01 :
+                            changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':  real_line.price_unit - (actual_amount/real_line.quantity)   } ) )    
+                            break
+                        else:
+                            if real_line.price_unit == 0.01 :
+                                pass
+                            else: 
+                                temp_discount = real_line.price_unit - 0.01
+                                
+                                changes_line['invoice_line_ids'].append( ( 1, real_line.id, { 'price_unit':  real_line.price_unit - temp_discount   } ) )
+                                actual_amount -= (temp_discount * real_line.quantity)    
+                            
+                    
+                    self._check_updatable_reward(inv,changes_line)
 
 
  
