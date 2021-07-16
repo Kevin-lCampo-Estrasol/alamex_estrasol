@@ -269,9 +269,21 @@ class MxPromotionssale(models.Model):
         for order in self:
             inv = res.filtered(lambda t: t.invoice_origin == order.name)
             if inv:
+                #Remove % discount ivoice
+                #changes_line={}
+                #At least 1 discout
+                if order.order_line.filtered(lambda ol: ol.is_reward_line):
+                    changes_line={}
+
+                    changes_line['invoice_line_ids'] = []
+                    for rmd in inv.invoice_line_ids:
+                        if rmd.discount:
+                            changes_line['invoice_line_ids'].append( ( 1, rmd.id, { 'price_unit':  rmd.sale_line_ids[0].price_reduce_taxexcl ,'discount':0,   } ) )    
+                    self._check_updatable_reward(inv,changes_line)
                 #Coupon avaible
                 have_coupouns = order.order_line.filtered(lambda ol: ol.is_reward_line and  ol.cupon_id)
                 
+
                 #CASE FREE PRODUCTS
                 changes_line=False               
                 for cup in have_coupouns.filtered(lambda ol: ol.cupon_id.reward_type == 'product'):   
