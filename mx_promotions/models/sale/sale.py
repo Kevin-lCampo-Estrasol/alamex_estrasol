@@ -20,10 +20,11 @@ class MxPromotionssale(models.Model):
         res = super(MxPromotionssale, self).create(vals)
         res.recompute_coupon_lines()  
         return res 
-    #def write(self, values):
-    #    super(MxPromotionssale, self).write(values)
-    #    if self.state in ['draft','sent']:
-    #        self.recompute_coupon_lines()  
+    def write(self, values):
+        if self.state in ['draft','sent'] and not values['order_line'] :
+            self.recompute_coupon_lines() 
+        super(MxPromotionssale, self).write(values)
+        
          
     def _get_reward_values_free_shipping(self, program):
         delivery_line = self.order_line.filtered(lambda x: x.is_delivery)
