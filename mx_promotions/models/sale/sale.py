@@ -20,6 +20,7 @@ class MxPromotionssale(models.Model):
         res = super(MxPromotionssale, self).create(vals)
         res.recompute_coupon_lines()  
         return res 
+        
     #def write(self, values):
     #    if self.state in ['draft','sent'] and not values['order_line'] :
     #        self.recompute_coupon_lines() 
